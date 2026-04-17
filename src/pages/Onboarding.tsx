@@ -62,7 +62,7 @@ export default function Onboarding() {
           score: c.categories.filter((cat) => selected.has(cat.id)).length,
         }))
         .sort((a, b) => b.score - a.score)
-        .slice(0, 8)
+        .slice(0, 12)
         .map((x) => x.c);
       setSamples(ranked);
       setStep("swipes");
