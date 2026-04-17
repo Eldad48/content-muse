@@ -18,9 +18,12 @@ export default function Onboarding() {
   const [step, setStep] = useState<Step>("categories");
   const [categories, setCategories] = useState<Category[]>([]);
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [search, setSearch] = useState("");
   const [samples, setSamples] = useState<ContentWithCategories[]>([]);
   const [sampleIdx, setSampleIdx] = useState(0);
   const [saving, setSaving] = useState(false);
+
+  const MIN_SELECT = 5;
 
   useEffect(() => {
     if (!loading && !user) navigate("/auth");
@@ -33,6 +36,10 @@ export default function Onboarding() {
   useEffect(() => {
     fetchCategories().then(setCategories);
   }, []);
+
+  const filtered = categories.filter((c) =>
+    c.name.toLowerCase().includes(search.toLowerCase())
+  );
 
   const toggle = (id: string) => {
     setSelected((prev) => {
