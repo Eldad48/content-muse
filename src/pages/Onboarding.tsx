@@ -50,7 +50,7 @@ export default function Onboarding() {
   };
 
   const goToSwipes = async () => {
-    if (!user || selected.size < 3) return;
+    if (!user || selected.size < MIN_SELECT) return;
     setSaving(true);
     try {
       await saveCategoryPreferences(user.id, Array.from(selected));
@@ -123,11 +123,18 @@ export default function Onboarding() {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
             >
-              <p className="mb-6 text-muted-foreground">
-                Pick at least 3 things you're into. We'll use these to recommend content.
+              <p className="mb-4 text-muted-foreground">
+                Pick at least {MIN_SELECT} interests across any aspect of life — the more you choose, the sharper your feed.
               </p>
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search interests (e.g. anime, fitness, space...)"
+                className="mb-4 w-full rounded-lg border border-border bg-card px-4 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
+              />
               <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-3">
-                {categories.map((c) => {
+                {filtered.map((c) => {
                   const isOn = selected.has(c.id);
                   return (
                     <button
@@ -154,16 +161,21 @@ export default function Onboarding() {
                     </button>
                   );
                 })}
+                {filtered.length === 0 && (
+                  <p className="col-span-full py-8 text-center text-sm text-muted-foreground">
+                    No interests match "{search}"
+                  </p>
+                )}
               </div>
 
               <div className="sticky bottom-0 -mx-6 border-t border-border bg-background/95 p-4 backdrop-blur">
                 <div className="mx-auto flex max-w-2xl items-center justify-between gap-4">
-                  <Badge variant={selected.size >= 3 ? "default" : "secondary"}>
-                    {selected.size} selected {selected.size < 3 && "(min 3)"}
+                  <Badge variant={selected.size >= MIN_SELECT ? "default" : "secondary"}>
+                    {selected.size} selected {selected.size < MIN_SELECT && `(min ${MIN_SELECT})`}
                   </Badge>
                   <Button
                     onClick={goToSwipes}
-                    disabled={selected.size < 3 || saving}
+                    disabled={selected.size < MIN_SELECT || saving}
                     size="lg"
                   >
                     {saving ? "Saving..." : "Continue"}
