@@ -4,7 +4,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
-import Index from "./pages/Index";
+import Feed from "./pages/Feed";
+import Onboarding from "./pages/Onboarding";
 import Explore from "./pages/Explore";
 import ContentDetail from "./pages/ContentDetail";
 import Profile from "./pages/Profile";
@@ -23,7 +24,8 @@ function App() {
             <Toaster />
             <Sonner />
             <Routes>
-              <Route path="/" element={<Index />} />
+              <Route path="/" element={<Feed />} />
+              <Route path="/onboarding" element={<Onboarding />} />
               <Route path="/explore" element={<Explore />} />
               <Route path="/content/:id" element={<ContentDetail />} />
               <Route path="/profile" element={<Profile />} />
