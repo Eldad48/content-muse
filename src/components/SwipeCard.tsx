@@ -1,8 +1,9 @@
 import { motion, useMotionValue, useTransform, PanInfo } from "framer-motion";
-import { Heart, X, Bookmark, Eye, Music2, Camera } from "lucide-react";
+import { Heart, X, Bookmark, Eye, Music2, Camera, Share2, Youtube, Twitter, MessageCircle, Image as ImageIcon } from "lucide-react";
 import { ContentWithCategories } from "@/types/database";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 interface SwipeCardProps {
   content: ContentWithCategories;
@@ -33,10 +34,15 @@ export function SwipeCard({
   };
 
   const query = encodeURIComponent(content.title);
-  const tiktokUrl = `https://www.tiktok.com/search?q=${query}`;
-  const instagramUrl = `https://www.instagram.com/explore/tags/${encodeURIComponent(
-    content.title.replace(/\s+/g, "")
-  )}/`;
+  const tag = encodeURIComponent(content.title.replace(/\s+/g, ""));
+  const socials = [
+    { name: "TikTok", icon: Music2, url: `https://www.tiktok.com/search?q=${query}` },
+    { name: "Instagram", icon: Camera, url: `https://www.instagram.com/explore/tags/${tag}/` },
+    { name: "YouTube", icon: Youtube, url: `https://www.youtube.com/results?search_query=${query}` },
+    { name: "X / Twitter", icon: Twitter, url: `https://twitter.com/search?q=${query}` },
+    { name: "Reddit", icon: MessageCircle, url: `https://www.reddit.com/search/?q=${query}` },
+    { name: "Pinterest", icon: ImageIcon, url: `https://www.pinterest.com/search/pins/?q=${query}` },
+  ];
 
   return (
     <motion.div
@@ -94,26 +100,34 @@ export function SwipeCard({
           >
             <Bookmark className={`h-6 w-6 ${isSaved ? "fill-primary text-primary" : "text-foreground"}`} />
           </button>
-          <a
-            href={tiktokUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={(e) => e.stopPropagation()}
-            className="flex h-12 w-12 items-center justify-center rounded-full bg-background/60 backdrop-blur transition hover:bg-background/80"
-            aria-label="Search on TikTok"
-          >
-            <Music2 className="h-6 w-6 text-foreground" />
-          </a>
-          <a
-            href={instagramUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={(e) => e.stopPropagation()}
-            className="flex h-12 w-12 items-center justify-center rounded-full bg-background/60 backdrop-blur transition hover:bg-background/80"
-            aria-label="Search on Instagram"
-          >
-            <Camera className="h-6 w-6 text-foreground" />
-          </a>
+          <Popover>
+            <PopoverTrigger asChild>
+              <button
+                onClick={(e) => e.stopPropagation()}
+                className="flex h-12 w-12 items-center justify-center rounded-full bg-background/60 backdrop-blur transition hover:bg-background/80"
+                aria-label="Find on socials"
+              >
+                <Share2 className="h-6 w-6 text-foreground" />
+              </button>
+            </PopoverTrigger>
+            <PopoverContent side="left" align="end" className="w-56 p-2">
+              <p className="px-2 py-1 text-xs font-semibold uppercase text-muted-foreground">
+                Find references on
+              </p>
+              {socials.map((s) => (
+                <a
+                  key={s.name}
+                  href={s.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => e.stopPropagation()}
+                  className="flex items-center gap-3 rounded-md px-3 py-2 text-sm text-foreground hover:bg-accent"
+                >
+                  <s.icon className="h-4 w-4" /> {s.name}
+                </a>
+              ))}
+            </PopoverContent>
+          </Popover>
         </div>
 
         {/* Bottom info */}
