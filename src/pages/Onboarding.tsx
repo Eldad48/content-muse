@@ -59,12 +59,16 @@ export default function Onboarding() {
       const ranked = all
         .map((c) => ({
           c,
-          score: c.categories.filter((cat) => selected.has(cat.id)).length,
+          score:
+            c.categories.filter((cat) => selected.has(cat.id)).length * 10 +
+            (c.content_type === "video" ? 3 : 1) +
+            Math.random(),
         }))
         .sort((a, b) => b.score - a.score)
+        .filter((x) => x.score > 1)
         .slice(0, 12)
         .map((x) => x.c);
-      setSamples(ranked);
+      setSamples(ranked.length > 0 ? ranked : all.slice(0, 12));
       setStep("swipes");
     } catch (e) {
       console.error(e);
@@ -208,11 +212,23 @@ export default function Onboarding() {
                     exit={{ opacity: 0 }}
                     className="absolute inset-0 overflow-hidden rounded-2xl bg-card shadow-xl"
                   >
-                    <img
-                      src={samples[sampleIdx].thumbnail_url || samples[sampleIdx].url}
-                      alt={samples[sampleIdx].title}
-                      className="h-full w-full object-cover"
-                    />
+                    {samples[sampleIdx].content_type === "video" ? (
+                      <video
+                        src={samples[sampleIdx].url}
+                        poster={samples[sampleIdx].thumbnail_url ?? undefined}
+                        className="h-full w-full object-cover"
+                        autoPlay
+                        muted
+                        loop
+                        playsInline
+                      />
+                    ) : (
+                      <img
+                        src={samples[sampleIdx].thumbnail_url || samples[sampleIdx].url}
+                        alt={samples[sampleIdx].title}
+                        className="h-full w-full object-cover"
+                      />
+                    )}
                     <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
                     <div className="absolute bottom-0 left-0 right-0 p-5">
                       <h3 className="mb-2 text-xl font-bold text-foreground">
