@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import {
-  fetchContentWithCategories,
+  fetchRecommendedContent,
   recordInteraction,
   toggleSave,
 } from "@/lib/content";
@@ -40,15 +40,13 @@ export default function Feed() {
 
   // Load feed
   useEffect(() => {
-    fetchContentWithCategories()
+    fetchRecommendedContent(user?.id)
       .then((data) => {
-        // Shuffle a bit for variety
-        const shuffled = [...data].sort(() => Math.random() - 0.5);
-        setItems(shuffled);
+        setItems(data);
       })
       .catch((e) => console.error(e))
       .finally(() => setLoading(false));
-  }, []);
+  }, [user?.id]);
 
   // Record view for current item
   useEffect(() => {
@@ -108,7 +106,8 @@ export default function Feed() {
       const isNow = await toggleSave(user.id, current.id);
       setSavedIds((prev) => {
         const next = new Set(prev);
-        isNow ? next.add(current.id) : next.delete(current.id);
+        if (isNow) next.add(current.id);
+        else next.delete(current.id);
         return next;
       });
     } catch (e) {
@@ -253,11 +252,23 @@ export default function Feed() {
               {next && (
                 <div className="absolute inset-0 scale-95 opacity-60">
                   <div className="h-full w-full overflow-hidden rounded-2xl bg-card">
-                    <img
-                      src={next.thumbnail_url || next.url}
-                      alt=""
-                      className="h-full w-full object-cover"
-                    />
+                    {next.content_type === "video" ? (
+                      <video
+                        src={next.url}
+                        poster={next.thumbnail_url ?? undefined}
+                        className="h-full w-full object-cover"
+                        muted
+                        playsInline
+                        preload="metadata"
+                      />
+                    ) : (
+                      <img
+                        src={next.thumbnail_url || next.url}
+                        alt=""
+                        className="h-full w-full object-cover"
+                        draggable={false}
+                      />
+                    )}
                   </div>
                 </div>
               )}
