@@ -49,7 +49,9 @@ export async function fetchRecommendedContent(userId?: string): Promise<ContentW
   if (!userId) return [...allContent].sort(() => Math.random() - 0.5);
 
   const preferences = await fetchUserPreferences(userId).catch(() => []);
-  const preferenceMap = new Map(preferences.map((p) => [p.category_id, Number(p.weight)]));
+  const preferenceMap = new Map<string, number>(
+    preferences.map((p) => [p.category_id, Number(p.weight)] as [string, number])
+  );
 
   return allContent
     .map((item) => {
