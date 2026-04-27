@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { Content, Category, ContentWithCategories, Interaction } from "@/types/database";
+import { fetchUserPreferences } from "@/lib/preferences";
 
 export async function fetchContent(): Promise<Content[]> {
   const { data, error } = await supabase
@@ -41,6 +42,30 @@ export async function fetchContentWithCategories(): Promise<ContentWithCategorie
     ...content,
     categories: categoryMap.get(content.id) || []
   }));
+}
+
+export async function fetchRecommendedContent(userId?: string): Promise<ContentWithCategories[]> {
+  const allContent = await fetchContentWithCategories();
+  if (!userId) return [...allContent].sort(() => Math.random() - 0.5);
+
+  const preferences = await fetchUserPreferences(userId).catch(() => []);
+  const preferenceMap = new Map(preferences.map((p) => [p.category_id, Number(p.weight)]));
+
+  return allContent
+    .map((item) => {
+      const preferenceScore = item.categories.reduce(
+        (total, category) => total + (preferenceMap.get(category.id) ?? 0),
+        0
+      );
+      const engagementScore = Math.log1p(item.view_count) + Math.log1p(item.like_count) * 1.5;
+      const mediaBoost = item.content_type === "video" ? 2 : 0.75;
+      return {
+        item,
+        score: preferenceScore * 10 + engagementScore + mediaBoost + Math.random() * 2,
+      };
+    })
+    .sort((a, b) => b.score - a.score)
+    .map(({ item }) => item);
 }
 
 export async function fetchCategories(): Promise<Category[]> {
