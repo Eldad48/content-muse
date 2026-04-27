@@ -106,7 +106,8 @@ export default function Feed() {
       const isNow = await toggleSave(user.id, current.id);
       setSavedIds((prev) => {
         const next = new Set(prev);
-        isNow ? next.add(current.id) : next.delete(current.id);
+        if (isNow) next.add(current.id);
+        else next.delete(current.id);
         return next;
       });
     } catch (e) {
